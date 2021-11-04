@@ -65,7 +65,7 @@ function UserPage() {
     
           (<h3>LOADING...</h3>
         ) : (
-          <h5>{JSON.stringify(reduxStore.setSubsListReducer.data.stats.member_count)}</h5>
+          <h5>{JSON.stringify(reduxStore.setSubsListReducer.data.stats)}</h5>
         )}
       </div>
 

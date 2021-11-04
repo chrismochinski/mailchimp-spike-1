@@ -1,8 +1,8 @@
 const express = require("express");
 const pool = require("../modules/pool");
 const router = express.Router();
-
 const client = require("@mailchimp/mailchimp_marketing");
+
 
 const { default: axios } = require("axios");
 client.setConfig({
@@ -26,13 +26,46 @@ router.get("/", async (req, res) => {
   const response = await client.lists
     .getList(process.env.TEST_LIST_ID)
     .then((response) => {
-      console.log('response is:', response)
+      console.log("response is:", response);
       res.send(response);
     })
     .catch((error) => {
       res.sendStatus(500);
     });
 });
+
+//important
+router.post("/", async (req, res) => {
+  const listId = process.env.TEST_LIST_ID; //id number
+  const subscribingUser = Object.keys(req.body)[0]; //email submitted
+  console.log("we are using these:", listId, subscribingUser);
+
+  const response = await client.lists.addListMember(listId, {
+    email_address: subscribingUser,
+    status: "subscribed",
+    // merge_fields: {
+    //   FNAME: subscribingUser.firstName,
+    //   LNAME: subscribingUser.lastName,
+    // },
+  }).then((response) => {
+    console.log('response from POST is:', response);
+    res.send(response);
+  })
+  .catch((error) => {
+    res.sendStatus(500);
+    console.log('error in POST on router page:', error)
+  });
+});
+
+// {
+//   const response = await mailchimp.lists.addListMember(listId, {
+//     email_address: subscribingUser.email,
+//     status: "subscribed",
+//     merge_fields: {
+//       FNAME: subscribingUser.firstName,
+//       LNAME: subscribingUser.lastName
+//     }
+//   });
 
 /**
  * @api {post} /subscribe Send new subscriber email to mailing list
@@ -57,27 +90,27 @@ router.get("/", async (req, res) => {
  * Mo's 'Audience ID' = 7dcef6c713
  *
  */
-router.post("/", (req, res) => {
-  let emailSubmission = Object.keys(req.body)[0];
-  console.log("router plan req.body:", emailSubmission);
-  const mcData = {
-    members: [
-      {
-        email_address: emailSubmission,
-        status: "subscribe",
-      },
-    ],
-  };
-  const mcDataPost = JSON.stringify(mcData);
-  const options = {
-    url: `https://us5.api.mailchimp.com/3.0/lists/${process.env.TEST_LIST_ID}`,
-    method: "POST",
-    headers: {
-      Authorization: `auth ${process.env.MAILCHIMP_API_KEY}`,
-    },
-    body: mcDataPost,
-  };
-});
+// router.post("/", (req, res) => {
+//   let emailSubmission = Object.keys(req.body)[0];
+//   console.log("router plan req.body:", emailSubmission);
+//   const mcData = {
+//     members: [
+//       {
+//         email_address: emailSubmission,
+//         status: "subscribe",
+//       },
+//     ],
+//   };
+//   const mcDataPost = JSON.stringify(mcData);
+//   const options = {
+//     url: `https://us5.api.mailchimp.com/3.0/lists/${process.env.TEST_LIST_ID}`,
+//     method: "POST",
+//     headers: {
+//       Authorization: `auth ${process.env.MAILCHIMP_API_KEY}`,
+//     },
+//     body: mcDataPost,
+//   };
+// });
 
 // router.post("/", (req, res) => {
 //   let emailSubmission = Object.keys(req.body)[0]
